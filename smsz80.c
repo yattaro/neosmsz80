@@ -47,7 +47,7 @@ void system_init(char *prog_name, char *bios_file, char *rom_file)
             return;
         }
     }
-    else printf("No ROM file specified!  Booting standalone BIOS!");
+    else printf("No ROM file specified!  Booting standalone BIOS!\n");
     mem = init_memory();
     printf("Memory map initialized:\n"
         "Slot 0: 0x%x-0x%x Slot 1: 0x%x-0x%x Slot 2: 0x%x-0x%x\n"
@@ -67,7 +67,7 @@ void run_loop()
 void print_usage(char *prog_name)
 {
     printf(
-        "Usage: %s --bios=<BIOS file> --rom=<ROM file>\n"
+        "Usage: %s --bios=<BIOS file> <ROM file>\n"
         "-h,  --help                            Print this help.\n"
         "-b <BIOS file>,  --bios=<BIOS file>    Specifies BIOS file to use.\n"
         "-r <ROM file>,   --rom=<ROM file>      Specifies ROM file to use.\n",
@@ -82,13 +82,13 @@ int main(int argc, char *argv[])
     int help_flag = 0, c = 0, option_index = 0;
     struct option long_options[] =
     {
-        {"help", no_argument, 0, 'h'},
+        {"help", no_argument,       0, 'h'},
         {"bios", required_argument, 0, 'b'},
-        {"rom", required_argument, 0, 'r'},
-        {0,0,0,0}
+        {"rom",  required_argument, 0, 'r'},
+        {0,      0,                 0,  0 }
     };
     while(!help_flag &&
-        (c = getopt_long(argc, argv, "-hrb:", long_options, &option_index)) != -1
+        (c = getopt_long(argc, argv, "-hb:r:", long_options, &option_index)) != -1
     )
     {
         switch(c)
@@ -100,10 +100,19 @@ int main(int argc, char *argv[])
                 rom_file = optarg;
                 break;
             default:
+                if(rom_file == NULL)
+                {
+                    rom_file = optarg;
+                    break;
+                }
+                printf("More than one ROM file specified!\n");
+                /* fall through */
+            case '?':
                 errno = EINVAL;
                 /* fall through */
             case 'h':
                 help_flag = 1;
+                break;
         }
     }
     if(help_flag) print_usage(argv[0]);
