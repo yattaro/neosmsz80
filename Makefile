@@ -5,8 +5,8 @@ CC = gcc
 CFLAGS = -Wall -Wextra -Werror -pedantic
 
 # Files used for the main program
-CFILES = smsz80.c mem.c
-CDEPS := $(CFILES) mem.h smsz80_common.h
+CFILES = smsz80.c sms_runner.c mem.c
+CDEPS := $(CFILES) mem.h smsz80_common.h sms_runner.h
 
 .PHONY: clean
 .DEFAULT_GOAL: smsz80

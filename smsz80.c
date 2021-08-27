@@ -1,68 +1,8 @@
 #include <errno.h>
 #include <getopt.h>
+#include <stdbool.h>
 #include <stdio.h>
-#include <stdlib.h>
-#include "mem.h"
-#include "smsz80_common.h"
-
-struct mem_map *mem;
-struct bin_object *bios;
-struct bin_object *rom;
-
-void system_init(char *prog_name, char *bios_file, char *rom_file)
-{
-    if(bios_file != NULL)
-    {
-        bios = read_bin_file(bios_file);
-        if(errno == 0 && bios != NULL)
-        {
-            printf("BIOS file %s: %d bytes read successfully.\n",
-                bios_file, bios->size);
-        }
-        else
-        {
-            perror("Failed to read BIOS file.");
-            return;
-        }
-    }
-    else
-    {
-        fprintf(stderr, "No BIOS file specified!\nUse %s --help for help.\n",
-            prog_name
-        );
-        errno = EINVAL;
-        return;
-    }
-    if(rom_file != NULL)
-        {
-        rom = read_bin_file(rom_file);
-        if(errno == 0 && rom_file != NULL)
-        {
-            printf("ROM file %s: %d bytes read successfully.\n",
-                rom_file, rom->size);
-        }
-        else
-        {
-            perror("Failed to read ROM file.");
-            return;
-        }
-    }
-    else printf("No ROM file specified!  Booting standalone BIOS!\n");
-    mem = init_memory();
-    printf("Memory map initialized:\n"
-        "Slot 0: 0x%x-0x%x Slot 1: 0x%x-0x%x Slot 2: 0x%x-0x%x\n"
-        "RAM: 0x%x-0x%x RAM Mirror: 0x%x-0x%x\n"
-        "Total memory: %d bytes\n",
-        mem->rom_s0_offset, (mem->rom_s1_offset)-1, mem->rom_s1_offset,
-        (mem->rom_s2_offset)-1, mem->rom_s2_offset, (mem->ram_offset)-1,
-        mem->ram_offset, (mem->ram_mirror_offset)-1,
-        mem->ram_mirror_offset, (mem->size)-1, mem->size);
-}
-
-void run_loop()
-{
-
-}
+#include "sms_runner.h"
 
 void print_usage(char *prog_name)
 {
@@ -77,18 +17,19 @@ void print_usage(char *prog_name)
 
 int main(int argc, char *argv[])
 {
-    char *bios_file = NULL;
-    char *rom_file = NULL;
-    int help_flag = 0, c = 0, option_index = 0;
-    struct option long_options[] =
+    char *bios_file = NULL, *rom_file = NULL;
+    bool help_flag = false;
+    int c = 0, longind = 0;
+    struct option longopts[] =
     {
         {"help", no_argument,       0, 'h'},
         {"bios", required_argument, 0, 'b'},
         {"rom",  required_argument, 0, 'r'},
         {0,      0,                 0,  0 }
     };
+    char *shortopts = "-hb:r:";
     while(!help_flag &&
-        (c = getopt_long(argc, argv, "-hb:r:", long_options, &option_index)) != -1
+        (c = getopt_long(argc, argv, shortopts, longopts, &longind)) != -1
     )
     {
         switch(c)
@@ -96,10 +37,10 @@ int main(int argc, char *argv[])
             case 'b':
                 bios_file = optarg;
                 break;
-            case 'r':
-                rom_file = optarg;
-                break;
             default:
+                /* Interpret non-option argument as ROM file */
+                /* fall through */
+            case 'r':
                 if(rom_file == NULL)
                 {
                     rom_file = optarg;
@@ -111,7 +52,7 @@ int main(int argc, char *argv[])
                 errno = EINVAL;
                 /* fall through */
             case 'h':
-                help_flag = 1;
+                help_flag = true;
                 break;
         }
     }
