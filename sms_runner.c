@@ -1,25 +1,70 @@
 #include <errno.h>
+#include <math.h>
+#include <signal.h>
 #include <stdbool.h>
 #include <stdlib.h>
+#include <time.h>
 #include "mem.h"
 #include "sms_runner.h"
+#include "z80.h"
 
+bool quitting = false;
 struct mem_map *mem;
 struct bin_object *bios;
 struct bin_object *rom;
 bool codemasters = false;
 
-void update()
+void sigint_handler()
 {
-    //signal other threads
+    quitting = true;
+    printf("Interrupted\n");
 }
 
-void run_loop()
+double clock_gettime_msec()
 {
-    while(1)
+    struct timespec current;
+    if(clock_gettime(CLOCK_MONOTONIC, &current))
     {
-        
+        return -1;
     }
+    return (current.tv_sec * 1000) + round(current.tv_nsec / 1000000);
+}
+
+void update()
+{
+    unsigned int ticks = 0;
+
+    while(ticks < TICKS_PER_FRAME)
+    {
+        int core_cycles = next_instruction();
+        int new_ticks = core_cycles * CORE_DIV;
+        // TODO: add VDP and sound updates, not immediately necessary
+        // for testing the event loop though
+        ticks += new_ticks;
+    }
+}
+
+int run_loop()
+{
+    int exit_status = 0;
+    //target framerate in frames per millisecond
+    const double frame_rate = 1000 / (MAIN_CLK/TICKS_PER_FRAME);
+    double last_frame_time = 0;
+    double current_time = 0;
+    while(!quitting && exit_status == 0)
+    {
+        if((current_time = clock_gettime_msec()) == -1)
+        {
+            exit_status = errno;
+            break;
+        }
+        if((last_frame_time + frame_rate) <= current_time)
+        {
+            last_frame_time = current_time;
+            update();
+        }
+    }
+    return exit_status;
 }
 
 void system_init(char *prog_name, char *bios_file, char *rom_file)
@@ -56,6 +101,9 @@ void system_init(char *prog_name, char *bios_file, char *rom_file)
         (mem->rom_s2_offset)-1, mem->rom_s2_offset, (mem->ram_offset)-1,
         mem->ram_offset, (mem->ram_mirror_offset)-1,
         mem->ram_mirror_offset, (mem->size)-1, mem->size);
+    signal(SIGINT, sigint_handler);
+
+    int exit_status = run_loop();
 }
 
 int init_rom(char *rom_file)

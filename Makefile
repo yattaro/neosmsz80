@@ -2,11 +2,11 @@
 CC = gcc
 
 # Compile time flags
-CFLAGS = -Wall -Wextra -Werror -pedantic
+CFLAGS = -Wall -Wextra -pedantic
 
 # Files used for the main program
-CFILES = smsz80.c sms_runner.c mem.c
-CDEPS := $(CFILES) mem.h smsz80_common.h sms_runner.h
+CFILES = smsz80.c sms_runner.c mem.c z80.c
+CDEPS := $(CFILES) mem.h smsz80_common.h sms_runner.h z80.h
 
 .PHONY: clean
 .DEFAULT_GOAL: smsz80
