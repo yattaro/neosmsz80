@@ -102,8 +102,7 @@ void system_init(char *prog_name, char *bios_file, char *rom_file)
         mem->ram_offset, (mem->ram_mirror_offset)-1,
         mem->ram_mirror_offset, (mem->size)-1, mem->size);
     signal(SIGINT, sigint_handler);
-
-    int exit_status = run_loop();
+    errno = run_loop();
 }
 
 int init_rom(char *rom_file)
