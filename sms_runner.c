@@ -3,6 +3,7 @@
 #include <signal.h>
 #include <stdbool.h>
 #include <stdlib.h>
+#include <string.h>
 #include <time.h>
 #include "mem.h"
 #include "sms_runner.h"
@@ -12,7 +13,6 @@ bool quitting = false;
 struct mem_map *mem;
 struct bin_object *bios;
 struct bin_object *rom;
-bool codemasters = false;
 
 void sigint_handler()
 {
@@ -67,7 +67,7 @@ int run_loop()
     return exit_status;
 }
 
-void system_init(char *prog_name, char *bios_file, char *rom_file)
+void system_init(char *bios_file, char *rom_file)
 {
     if(bios_file != NULL)
     {
@@ -85,11 +85,7 @@ void system_init(char *prog_name, char *bios_file, char *rom_file)
     }
     else
     {
-        fprintf(stderr, "No BIOS file specified!\nUse %s --help for help.\n",
-            prog_name
-        );
-        errno = EINVAL;
-        return;
+        fprintf(stderr, "No BIOS file specified!  Skipping...\n");
     }
     if(init_rom(rom_file) != 0) return;
     mem = init_memory();
@@ -101,6 +97,8 @@ void system_init(char *prog_name, char *bios_file, char *rom_file)
         (mem->rom_s2_offset)-1, mem->rom_s2_offset, (mem->ram_offset)-1,
         mem->ram_offset, (mem->ram_mirror_offset)-1,
         mem->ram_mirror_offset, (mem->size)-1, mem->size);
+    if(rom->size < 0xC000) memcpy(rom->data, mem->data, rom->size);
+    else memcpy(rom->data, mem->data, 0xC000);
     signal(SIGINT, sigint_handler);
     errno = run_loop();
 }

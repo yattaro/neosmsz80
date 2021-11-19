@@ -7,7 +7,7 @@
 void print_usage(char *prog_name)
 {
     printf(
-        "Usage: %s --bios=<BIOS file> <ROM file>\n"
+        "Usage: %s <ROM file>\n"
         "-h,  --help                            Print this help.\n"
         "-b <BIOS file>,  --bios=<BIOS file>    Specifies BIOS file to use.\n"
         "-r <ROM file>,   --rom=<ROM file>      Specifies ROM file to use.\n",
@@ -35,7 +35,13 @@ int main(int argc, char *argv[])
         switch(c)
         {
             case 'b':
-                bios_file = optarg;
+                if(bios_file == NULL)
+                {
+                    bios_file = optarg;
+                    break;
+                }
+                printf("More than one BIOS file specified!\n");
+                help_flag = true;
                 break;
             default:
                 /* Interpret non-option argument as ROM file */
@@ -57,6 +63,6 @@ int main(int argc, char *argv[])
         }
     }
     if(help_flag) print_usage(argv[0]);
-    else system_init(argv[0], bios_file, rom_file);
+    else system_init(bios_file, rom_file);
     return errno;
 }

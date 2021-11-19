@@ -40,33 +40,63 @@ struct bin_object *read_bin_file(char *filename)
     {
         fclose(fp);
         free(bin);
-        bin = NULL;
         //set errno for empty files
         if(filesize == 0) errno = EBFONT;
+        return NULL;
+    }
+
+    // Skip headers provided by ROM dumper programs
+    if((filesize % 0x4000) == 512)
+    {
+        bin->size = filesize - 512;
+        fseek(fp, 512, SEEK_SET);
+    }
+    else bin->size = filesize;
+
+    bin->data = malloc(bin->size);
+    size_t read_bytes = fread(bin->data, 1, bin->size, fp);
+    if(errno)
+    {
+        fclose(fp);
+        free(bin->data);
+        free(bin);
+        return NULL;
+    }
+    else if(read_bytes != filesize)
+    {
+        fclose(fp);
+        free(bin->data);
+        free(bin);
+        errno = EIO;
+        return NULL;
+    }
+
+    // Make appropriate checks for memory mapper
+    if(bin->size > 0x80000) bin->onemeg = true;
+    else bin->onemeg = false;
+    check_codemasters(bin);
+
+    return bin;
+}
+
+
+/*
+ * Checks if the given ROM uses the CodeMasters memory mapper and sets the
+ * codemasters variable if true.
+ */
+void check_codemasters(struct bin_object *rom)
+{
+    WORD checksum = ((rom->data[0x7fe7] << 8) | rom->data[0x7fe6]);
+
+    if(checksum == 0)
+    {
+        rom->codemasters = false;
     }
     else
     {
-        bin->size = filesize;
-        bin->data = malloc(bin->size);
-        size_t read_bytes = fread(bin->data, 1, bin->size, fp);
-        if(errno)
-        {
-            fclose(fp);
-            free(bin->data);
-            free(bin);
-            bin = NULL;
-        }
-        else if(read_bytes != filesize)
-        {
-            fclose(fp);
-            free(bin->data);
-            free(bin);
-            bin = NULL;
-            errno = EIO;
-        }
+        WORD checksum_opposite = ((rom->data[0x7fe9] << 8) | rom->data[0x7fe8]);
+        rom->codemasters = ((0x10000 - checksum) == checksum_opposite);
     }
-
-    return bin;
 }
 
 /*
