@@ -4,8 +4,9 @@
 #ifndef MEM
 #define MEM
 
-struct mem_map *init_memory();
-struct bin_object *read_bin_file(char *filename);
+void init_memory();
 void check_codemasters(struct bin_object *rom);
+void write_mem(const WORD addr, const BYTE data);
+struct bin_object *read_bin_file(const char *filename);
 size_t get_file_size(FILE *fp);
 #endif

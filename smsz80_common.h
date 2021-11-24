@@ -20,21 +20,16 @@ typedef signed char signed_byte;
 #endif
 
 #define ROM_S0_SIZE 0x4000
-#define ROM_S1_SIZE 0x4000
-#define ROM_S2_SIZE 0x4000
+#define ROM_S0_OFFSET 0x0
+#define ROM_S1_SIZE ROM_S0_SIZE
+#define ROM_S1_OFFSET ROM_S0_OFFSET + ROM_S0_SIZE
+#define ROM_S2_SIZE ROM_S0_SIZE
+#define ROM_S2_OFFSET ROM_S1_OFFSET + ROM_S1_SIZE
 #define RAM_SIZE 0x2000
-#define RAM_MIRROR_SIZE 0x2000
-
-struct mem_map
-{
-    int rom_s0_offset;
-    int rom_s1_offset;
-    int rom_s2_offset;
-    int ram_offset;
-    int ram_mirror_offset;
-    int size;
-    BYTE *data;
-};
+#define RAM_OFFSET ROM_S2_OFFSET + ROM_S2_SIZE
+#define RAM_MIRROR_SIZE RAM_SIZE
+#define RAM_MIRROR_OFFSET RAM_OFFSET + RAM_SIZE
+#define MEM_SIZE RAM_MIRROR_OFFSET + RAM_MIRROR_SIZE
 
 // struct used to store binary data from files
 struct bin_object{
@@ -44,7 +39,7 @@ struct bin_object{
     BYTE *data;
 };
 
-extern struct mem_map *mem;
+extern BYTE *mem;
 extern struct bin_object *bios;
 extern struct bin_object *rom;
 

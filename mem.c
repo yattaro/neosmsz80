@@ -1,25 +1,57 @@
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <sys/stat.h>
 #include "mem.h"
 #include "smsz80_common.h"
+
 
 /*
  * Initializes system memory and returns the memory map structure.
  * Returns a null pointer if this fails.
  */
-struct mem_map *init_memory()
+void init_memory()
 {
-    struct mem_map *mem = malloc(sizeof(struct mem_map));
-    mem->rom_s0_offset = 0;
-    mem->rom_s1_offset = ROM_S0_SIZE;
-    mem->rom_s2_offset = mem->rom_s1_offset + ROM_S1_SIZE;
-    mem->ram_offset = mem->rom_s2_offset + ROM_S2_SIZE;
-    mem->ram_mirror_offset = mem->ram_offset + RAM_SIZE;
-    mem->size = mem->ram_mirror_offset + RAM_MIRROR_SIZE;
-    mem->data = calloc(mem->size, sizeof(BYTE));
-    return mem;
+    mem = malloc(MEM_SIZE);
+}
+
+/*
+ * Checks if the given ROM uses the CodeMasters memory mapper and sets the
+ * codemasters variable if true.
+ */
+void check_codemasters(struct bin_object *rom)
+{
+    WORD checksum = ((rom->data[0x7fe7] << 8) | rom->data[0x7fe6]);
+
+    if(checksum == 0)
+    {
+        rom->codemasters = false;
+    }
+    else
+    {
+        WORD checksum_opposite = ((rom->data[0x7fe9] << 8) | rom->data[0x7fe8]);
+        rom->codemasters = ((0x10000 - checksum) == checksum_opposite);
+    }
+}
+
+/*
+ * Determines if the memory segment indicated by addr is writable and stores the
+ * value of data if it is, and simply returns if not (given this should be
+ * undefined behavior on the actual hardware)
+ */
+void write_mem(const WORD addr, const BYTE data)
+{
+    if(rom->codemasters)
+    {
+        // codemasters mapping
+    }
+
+    // slot 0 and slot 1 are never writable
+    if(addr < ROM_S2_OFFSET)
+    {
+        return;
+    }
 }
 
 /*
@@ -27,7 +59,7 @@ struct mem_map *init_memory()
  * If an error occurred while reading the file, errno is set and a null pointer
  * is returned.
  */
-struct bin_object *read_bin_file(char *filename)
+struct bin_object *read_bin_file(const char *filename)
 {
     FILE *fp;
     fp = fopen(filename, "rb");
@@ -70,33 +102,12 @@ struct bin_object *read_bin_file(char *filename)
         errno = EIO;
         return NULL;
     }
-
     // Make appropriate checks for memory mapper
     if(bin->size > 0x80000) bin->onemeg = true;
     else bin->onemeg = false;
     check_codemasters(bin);
 
     return bin;
-}
-
-
-/*
- * Checks if the given ROM uses the CodeMasters memory mapper and sets the
- * codemasters variable if true.
- */
-void check_codemasters(struct bin_object *rom)
-{
-    WORD checksum = ((rom->data[0x7fe7] << 8) | rom->data[0x7fe6]);
-
-    if(checksum == 0)
-    {
-        rom->codemasters = false;
-    }
-    else
-    {
-        WORD checksum_opposite = ((rom->data[0x7fe9] << 8) | rom->data[0x7fe8]);
-        rom->codemasters = ((0x10000 - checksum) == checksum_opposite);
-    }
 }
 
 /*

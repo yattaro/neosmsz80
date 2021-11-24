@@ -10,14 +10,14 @@
 #include "z80.h"
 
 bool quitting = false;
-struct mem_map *mem;
+BYTE *mem;
 struct bin_object *bios;
 struct bin_object *rom;
 
 void sigint_handler()
 {
     quitting = true;
-    printf("Interrupted\n");
+    printf("\nInterrupted\n");
 }
 
 double clock_gettime_msec()
@@ -67,7 +67,7 @@ int run_loop()
     return exit_status;
 }
 
-void system_init(char *bios_file, char *rom_file)
+void system_init(const char *bios_file, const char *rom_file)
 {
     if(bios_file != NULL)
     {
@@ -85,25 +85,25 @@ void system_init(char *bios_file, char *rom_file)
     }
     else
     {
-        fprintf(stderr, "No BIOS file specified!  Skipping...\n");
+        fprintf(stderr, "No BIOS file specified, skipping...\n");
     }
     if(init_rom(rom_file) != 0) return;
-    mem = init_memory();
+    init_memory();
     printf("Memory map initialized:\n"
         "Slot 0: 0x%x-0x%x Slot 1: 0x%x-0x%x Slot 2: 0x%x-0x%x\n"
         "RAM: 0x%x-0x%x RAM Mirror: 0x%x-0x%x\n"
         "Total memory: %d bytes\n",
-        mem->rom_s0_offset, (mem->rom_s1_offset)-1, mem->rom_s1_offset,
-        (mem->rom_s2_offset)-1, mem->rom_s2_offset, (mem->ram_offset)-1,
-        mem->ram_offset, (mem->ram_mirror_offset)-1,
-        mem->ram_mirror_offset, (mem->size)-1, mem->size);
-    if(rom->size < 0xC000) memcpy(rom->data, mem->data, rom->size);
-    else memcpy(rom->data, mem->data, 0xC000);
+        ROM_S0_OFFSET, ROM_S1_OFFSET-1, ROM_S1_OFFSET,
+        ROM_S2_OFFSET-1, ROM_S2_OFFSET, RAM_OFFSET-1,
+        RAM_OFFSET, RAM_MIRROR_OFFSET-1,
+        RAM_MIRROR_OFFSET, MEM_SIZE-1, MEM_SIZE);
+    if(rom->size < 0xC000) memcpy(rom->data, mem, rom->size);
+    else memcpy(rom->data, mem, 0xC000);
     signal(SIGINT, sigint_handler);
     errno = run_loop();
 }
 
-int init_rom(char *rom_file)
+int init_rom(const char *rom_file)
 {
     if(rom_file != NULL)
         {
@@ -112,6 +112,16 @@ int init_rom(char *rom_file)
         {
             printf("ROM file %s: %d bytes read successfully.\n",
                 rom_file, rom->size);
+            const char *header = "TMR SEGA";
+            if(memcmp(&rom->data[0x7ff0], header, 8) == 0)
+            {
+                printf("Valid header found!\n");
+            }
+            else
+            {
+                printf("ROM header invalid!  %.*s != %s\nJapanese ROM?\n",
+                8, &rom->data[0x7ff0], header);
+            }
         }
         else
         {
