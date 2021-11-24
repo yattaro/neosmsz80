@@ -13,7 +13,12 @@
  */
 void init_memory()
 {
-    mem = malloc(MEM_SIZE);
+    mem = malloc(sizeof(struct mem_map));
+    mem->main_mem = malloc(MEM_SIZE);
+    mem->bank0 = malloc(ROM_PAGE_SIZE);
+    mem->bank1 = malloc(ROM_PAGE_SIZE);
+    if(rom->size < 0xC000) memcpy(rom->data, mem->main_mem, rom->size);
+    else memcpy(rom->data, mem->main_mem, 0xC000);
 }
 
 /*
@@ -52,6 +57,35 @@ void write_mem(const WORD addr, const BYTE data)
     {
         return;
     }
+
+    // slot 2 is writable if RAM is mapped to it
+    if(addr < RAM_OFFSET)
+    {
+        switch(mem->main_mem[0xFFFC] & 0xC)
+        {
+            //bank 0
+            case 0x8:
+                mem->bank0[addr-ROM_S1_OFFSET] = data;
+                break;
+            //bank 1
+            case 0xC:
+                mem->bank1[addr-ROM_S1_OFFSET] = data;
+                break;
+            //ROM is mapped to slot 2, do nothing
+                /* fall through */
+        }
+        return;
+    }
+
+    // writing to RAM, should be fine
+    mem->main_mem = data;
+    
+    // TODO: memory paging
+
+    // RAM MIRROR
+    if(addr < 0xDFFC) mem->main_mem[addr+RAM_SIZE] = data;
+    if(addr >= RAM_MIRROR_OFFSET) mem->main_mem[addr-RAM_SIZE] = data;
+
 }
 
 /*
@@ -78,7 +112,7 @@ struct bin_object *read_bin_file(const char *filename)
     }
 
     // Skip headers provided by ROM dumper programs
-    if((filesize % 0x4000) == 512)
+    if((filesize % ROM_PAGE_SIZE) == 512)
     {
         bin->size = filesize - 512;
         fseek(fp, 512, SEEK_SET);

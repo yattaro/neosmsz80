@@ -10,7 +10,7 @@
 #include "z80.h"
 
 bool quitting = false;
-BYTE *mem;
+struct mem_map *mem;
 struct bin_object *bios;
 struct bin_object *rom;
 
@@ -97,8 +97,6 @@ void system_init(const char *bios_file, const char *rom_file)
         ROM_S2_OFFSET-1, ROM_S2_OFFSET, RAM_OFFSET-1,
         RAM_OFFSET, RAM_MIRROR_OFFSET-1,
         RAM_MIRROR_OFFSET, MEM_SIZE-1, MEM_SIZE);
-    if(rom->size < 0xC000) memcpy(rom->data, mem, rom->size);
-    else memcpy(rom->data, mem, 0xC000);
     signal(SIGINT, sigint_handler);
     errno = run_loop();
 }
