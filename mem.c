@@ -64,7 +64,7 @@ void write_mem(const WORD addr, const BYTE data)
     {
         if(mem->main_mem[0xFFFC] & 0x8)
         {
-            mem->slot_2[addr-ROM_S1_OFFSET] = data;
+            mem->slot_2[addr-ROM_S2_OFFSET] = data;
         }
         return;
     }
