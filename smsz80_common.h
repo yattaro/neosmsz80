@@ -39,9 +39,12 @@ struct bin_object{
 
 // struct used to store main memory map and contents of catridge RAM banks
 struct mem_map{
+    BYTE *slot_0;
+    BYTE *slot_1;
+    BYTE *slot_2;
     BYTE *main_mem;
-    BYTE *bank0;
-    BYTE *bank1;
+    BYTE *bank_0;
+    BYTE *bank_1;
 };
 
 extern struct mem_map *mem;

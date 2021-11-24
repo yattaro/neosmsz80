@@ -15,10 +15,11 @@ void init_memory()
 {
     mem = malloc(sizeof(struct mem_map));
     mem->main_mem = malloc(MEM_SIZE);
-    mem->bank0 = malloc(ROM_PAGE_SIZE);
-    mem->bank1 = malloc(ROM_PAGE_SIZE);
-    if(rom->size < 0xC000) memcpy(rom->data, mem->main_mem, rom->size);
-    else memcpy(rom->data, mem->main_mem, 0xC000);
+    mem->bank_0 = malloc(ROM_PAGE_SIZE);
+    mem->bank_1 = malloc(ROM_PAGE_SIZE);
+    mem->slot_0 = &rom->data[0];
+    mem->slot_1 = &rom->data[ROM_PAGE_SIZE];
+    mem->slot_2 = &rom->data[2*ROM_PAGE_SIZE];
 }
 
 /*
@@ -61,24 +62,15 @@ void write_mem(const WORD addr, const BYTE data)
     // slot 2 is writable if RAM is mapped to it
     if(addr < RAM_OFFSET)
     {
-        switch(mem->main_mem[0xFFFC] & 0xC)
+        if(mem->main_mem[0xFFFC] & 0x8)
         {
-            //bank 0
-            case 0x8:
-                mem->bank0[addr-ROM_S1_OFFSET] = data;
-                break;
-            //bank 1
-            case 0xC:
-                mem->bank1[addr-ROM_S1_OFFSET] = data;
-                break;
-            //ROM is mapped to slot 2, do nothing
-                /* fall through */
+            mem->slot_2[addr-ROM_S1_OFFSET] = data;
         }
         return;
     }
 
     // writing to RAM, should be fine
-    mem->main_mem = data;
+    mem->main_mem[addr] = data;
     
     // TODO: memory paging
 
@@ -119,7 +111,7 @@ struct bin_object *read_bin_file(const char *filename)
     }
     else bin->size = filesize;
 
-    bin->data = malloc(bin->size);
+    bin->data = malloc(0x100000);
     size_t read_bytes = fread(bin->data, 1, bin->size, fp);
     if(errno)
     {
