@@ -13,6 +13,9 @@
  */
 void init_memory()
 {
+    // TODO: figure out how to make this more memory efficient; main_mem
+    // includes the lower address space that is always mapped to cartridge ROM
+    // or RAM, so this space is effectively unused other than for alignment
     mem = malloc(sizeof(struct mem_map));
     mem->main_mem = malloc(MEM_SIZE);
     mem->bank_0 = malloc(ROM_PAGE_SIZE);
@@ -48,9 +51,10 @@ void check_codemasters(struct bin_object *rom)
  */
 void write_mem(const WORD addr, const BYTE data)
 {
-    if(rom->codemasters)
+    if(rom->codemasters && (addr == 0x0 || addr == 0x4000 || addr == 0x8000))
     {
         // codemasters mapping
+        mem_page_codemasters(addr, data);
     }
 
     // slot 0 and slot 1 are never writable
@@ -72,12 +76,111 @@ void write_mem(const WORD addr, const BYTE data)
     // writing to RAM, should be fine
     mem->main_mem[addr] = data;
     
-    // TODO: memory paging
+    // Writing to control registers, do standard paging if non-codemasters ROM
+    if(addr >= 0xFFFC && !rom->codemasters)
+    {
+        mem_page(addr, data);
+    }
 
-    // RAM MIRROR
+    // RAM Mirror
     if(addr < 0xDFFC) mem->main_mem[addr+RAM_SIZE] = data;
     if(addr >= RAM_MIRROR_OFFSET) mem->main_mem[addr-RAM_SIZE] = data;
 
+}
+
+/*
+ * Handles standard memory paging
+ */
+void mem_page(const WORD addr, const BYTE data)
+{
+    // Mask to first six bits if cartridge has 1MB ROM, first five if not
+    BYTE page = rom->onemeg ? data & 0x3F : data & 0x1F;
+
+    switch (addr)
+    {
+        // Set mapping of RAM to slot 2
+        case 0xFFFC:
+            switch (data & 0xC)
+            {
+                case 0x8:
+                    mem->slot_2 = mem->bank_0;
+                    break;
+                case 0xC:
+                    mem->slot_2 = mem->bank_1;
+                    break;
+                default:
+                break;
+            }
+            break;
+        
+        // Slot 0
+        case 0xFFFD:
+            mem->slot_0 = &rom->data[ROM_PAGE_SIZE * page];
+            break;
+
+        // Slot 1
+        case 0xFFFE:
+            mem->slot_1 = &rom->data[ROM_PAGE_SIZE * page];
+            break;
+        
+        // Mapping ROM to slot 2
+        case 0xFFFF:
+            if(!(mem->main_mem[0xFFFC] & 0x8))
+            {
+                mem->slot_2 = &rom->data[ROM_PAGE_SIZE * page];
+            }
+            break;
+        default:
+            break;
+    }
+}
+
+/*
+ * Handles memory paging for CodeMasters cartridges
+ */
+void mem_page_codemasters(const WORD addr, const BYTE data)
+{
+    // Mask to first six bits if cartridge has 1MB ROM, first five if not
+    BYTE page = rom->onemeg ? data & 0x3F : data & 0x1F;
+    switch (addr)
+    {
+        case 0x0:
+            mem->slot_0 = &rom->data[ROM_PAGE_SIZE * page];
+            break;
+        case 0x4000:
+            mem->slot_1 = &rom->data[ROM_PAGE_SIZE * page];
+            break;
+        case 0x8000:
+            mem->slot_2 = &rom->data[ROM_PAGE_SIZE * page];
+            break;
+        default:
+            break;
+    }
+}
+
+/*
+ * Returns value of memory stored at given address
+ */
+BYTE read_mem(const WORD addr)
+{
+    // Avoid reading the control registers by using the non-mirrored addresses
+    if(addr >= 0xFFFC) return mem->main_mem[addr-0x2000];
+    // Reading from lower memory
+    if(addr < RAM_OFFSET)
+    {
+        // Memory below 0x400 in non-codemasters cartridges is always
+        // mapped to the first page of ROM
+        if(!rom->codemasters && addr < 0x400) return rom->data[addr];
+    
+        // Slot 0
+        if(addr < ROM_S1_OFFSET) return mem->slot_0[addr];
+        // Slot 1
+        if(addr < ROM_S1_OFFSET) return mem->slot_1[addr - ROM_PAGE_SIZE];
+        // Slot 2
+        return mem->slot_2[addr - (2*ROM_PAGE_SIZE)];
+    }
+
+    return mem->main_mem[addr];
 }
 
 /*
