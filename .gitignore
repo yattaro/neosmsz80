@@ -59,4 +59,5 @@ _deps
 *.asm
 .vscode/
 *.code-workspace
+build/
 smsz80
