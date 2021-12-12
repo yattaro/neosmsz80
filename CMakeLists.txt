@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.20)
 project(smsz80 VERSION 0.1)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_HOME_DIRECTORY})
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
+set(CMAKE_INCLUDE_CURRENT_DIR_IN_INTERFACE ON)
 include_directories(inc)
 add_subdirectory(src)
