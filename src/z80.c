@@ -1,7 +1,8 @@
 #include "z80.h"
-#include "mem.h"
 #include "instruction.h"
+#include "mem.h"
 #include <errno.h>
+#include <stdbool.h>
 #include <string.h>
 
 struct z80_regs registers = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
@@ -14,7 +15,7 @@ int next_instruction()
     int opcode_cycles = 0;
     BYTE instr = read_mem(registers.PC);
     registers.PC++;
-    opcode_cycles = exec(instr);
+    opcode_cycles = exec_instr(instr);
     return opcode_cycles;
 }
 
@@ -27,12 +28,32 @@ void inc_rr()
     else registers.RR++;
 }
 
+void flag_set(enum z80_flags flag)
+{
+    registers.af.low |= flag;
+}
+
+void flag_clear(enum z80_flags flag)
+{
+    registers.af.low &= ~flag;
+}
+
+void flag_assign(enum z80_flags flag)
+{
+    registers.af.low &= flag;
+}
+
+bool flag_read(enum z80_flags flag)
+{
+    return registers.af.low & flag;
+}
+
 
 /*
  * Decodes and executes the given opcode and returns the number of cycles
  * requred.
  */
-int exec(BYTE opcode)
+int exec_instr(BYTE opcode)
 {
     inc_rr();
     switch (opcode)
@@ -40,11 +61,24 @@ int exec(BYTE opcode)
     case nop: 
         return 4;
     case ldbcXX:
+        ld_16bit_reg_IMM(&registers.bc);
+        return 10;
     case ldbcMEMa:
+        write_mem(registers.bc.complete, registers.af.high);
+        return 7;
     case incbc:
+        registers.bc.complete++;
+        return 6;
     case incb:
+        inc_8bit(&registers.bc.high);
+        return 4;
     case decb:
+        dec_8bit(&registers.bc.high);
+        return 4;
     case ldbX:
+        registers.bc.high = read_mem(registers.PC);
+        registers.PC++;
+        return 7;
     case rlca:
     case exafafSHADOW:
     case addhlbc:

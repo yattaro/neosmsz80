@@ -1,9 +1,18 @@
 #include "z80.h"
+/*
+ * Includes enums mapping opcodes to their instructions and helper functions for
+ * instruction execution.
+ */
 #ifndef Z80_INSTR
 #define Z80_INSTR
 
+void ld_16bit_reg_IMM(union reg *dst);
+void inc_8bit(BYTE *dst);
+void dec_8bit(BYTE *dst);
+void set_flags_8bit(BYTE val, BYTE orig, BYTE arg, bool subtract);
+
 enum pri_instructions {
-    nop,    // Implemented
+    nop,
     ldbcXX,
     ldbcMEMa,
     incbc,
