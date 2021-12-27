@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>800</width>
+    <width>900</width>
     <height>600</height>
    </rect>
   </property>
@@ -18,7 +18,7 @@
     <normaloff>:/images/sms_cart.png</normaloff>:/images/sms_cart.png</iconset>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="2,1">
+   <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="3,2">
     <item>
      <widget class="QGraphicsView" name="SMSDisp">
       <property name="minimumSize">
@@ -33,7 +33,7 @@
      </widget>
     </item>
     <item>
-     <layout class="QVBoxLayout" name="verticalLayout">
+     <layout class="QVBoxLayout" name="verticalLayout" stretch="1,2">
       <item>
        <widget class="QPlainTextEdit" name="z80RegView">
         <property name="font">
@@ -50,7 +50,9 @@
       <item>
        <widget class="QPlainTextEdit" name="z80MemView">
         <property name="font">
-         <font/>
+         <font>
+          <family>Monospace</family>
+         </font>
         </property>
         <property name="readOnly">
          <bool>true</bool>
@@ -72,7 +74,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>800</width>
+     <width>900</width>
      <height>19</height>
     </rect>
    </property>
@@ -95,7 +97,8 @@
   </widget>
   <action name="actionOpen_ROM">
    <property name="icon">
-    <iconset theme="document-open"/>
+    <iconset theme="document-open">
+     <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
     <string>Open ROM...</string>
@@ -112,7 +115,8 @@
     <bool>false</bool>
    </property>
    <property name="icon">
-    <iconset theme="media-playback-start"/>
+    <iconset theme="media-playback-start">
+     <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
     <string>Run</string>
@@ -129,7 +133,8 @@
     <bool>false</bool>
    </property>
    <property name="icon">
-    <iconset theme="media-playback-pause"/>
+    <iconset theme="media-playback-pause">
+     <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
     <string>Pause</string>
@@ -146,7 +151,8 @@
     <bool>false</bool>
    </property>
    <property name="icon">
-    <iconset theme="media-playback-stop"/>
+    <iconset theme="media-playback-stop">
+     <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
     <string>Stop</string>

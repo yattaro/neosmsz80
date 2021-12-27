@@ -19,11 +19,13 @@ public:
     z80mem(std::string rom_file);
     z80mem(sms_rom *rom);
     ~z80mem();
+    std::string strmem();
     void write_mem(size_t param, const ushort addr, const byte data);
     byte read_mem(size_t param, const ushort addr);
     void io_write(size_t param, const ushort addr, const byte data);
     byte io_read(size_t param, const ushort addr);
 private:
+    void slotstr(std::stringstream *memss, byte *slot, int slot_size, int start_offset);
     void init(sms_rom *rom, const bool rom_external);
     void mem_page(const ushort addr, const byte data);
     void mem_page_codemasters(const ushort addr, const byte data);

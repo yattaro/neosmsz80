@@ -15,7 +15,7 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
     void setRegisterVals();
-    void setMemView(const char *memStrings);
+    void setMemView();
 
 private slots:
     void on_actionOpen_ROM_triggered();

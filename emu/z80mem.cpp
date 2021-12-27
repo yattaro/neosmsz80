@@ -1,5 +1,7 @@
 #include "z80mem.h"
+#include <iomanip>
 #include <stdlib.h>
+#include <sstream>
 
 z80mem::z80mem(std::string rom_file)
 {
@@ -29,6 +31,30 @@ z80mem::~z80mem()
     delete main_mem;
     delete bank_0;
     delete bank_1;
+}
+
+std::string z80mem::strmem()
+{
+    std::stringstream memss;
+    slotstr(&memss, slot_0, ROM_PAGE_SIZE, 0x0);
+    slotstr(&memss, slot_1, ROM_PAGE_SIZE, 0x0);
+    slotstr(&memss, slot_2, ROM_PAGE_SIZE, 0x0);
+    slotstr(&memss, main_mem, 2*RAM_SIZE, RAM_OFFSET);
+    memss << std::endl;
+    return memss.str();
+}
+
+void z80mem::slotstr(std::stringstream *memss, byte *slot, int slot_size, int start_offset)
+{
+    for(auto i = start_offset; i < slot_size; i += 0x10)
+    {
+        *memss << std::hex << std::setfill('0') << std::setw(4) << i << " ";
+        for(auto j = 0x0; j < 0x10; j++)
+        {
+            *memss << std::hex << std::setfill('0') << std::setw(2) << (uint)slot[i+j];
+        }
+        *memss << "\n";
+    }
 }
 
 /*
@@ -96,17 +122,26 @@ byte z80mem::read_mem(size_t param, const ushort addr)
     return main_mem[addr];
 }
 
+//#define Z80_IO_OUTPUT
+
 void z80mem::io_write(size_t param, const ushort addr, const byte data)
 {
     (void)param;
+    #ifdef Z80_IO_OUTPUT
     printf("PW %04x %02x\n", addr, data);
+    #else
+    (void)addr;
+    (void)data;
+    #endif
 }
 
 byte z80mem::io_read(size_t param, const ushort addr)
 {
     (void)param;
     byte data = addr >> 8;
+    #ifdef Z80_IO_OUTPUT
     printf("PR %04x %02x\n", addr, data);
+    #endif
     return data;
 }
 

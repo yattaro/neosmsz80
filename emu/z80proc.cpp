@@ -1,4 +1,5 @@
 #include "z80proc.h"
+#include "sms.h"
 
 
 // Wrapper functions for non-static members of z80mem to be called by libz80
@@ -50,4 +51,19 @@ void z80proc::strregs(char *buff)
 bool z80proc::flag_read(Z80Flags flag)
 {
     return context.R1.br.F & flag;
+}
+
+/*
+ * Executees a single instruction and returns how long it took
+ */
+uint z80proc::exec_instr()
+{
+    context.tstates = 0;
+    Z80Execute(&this->context);
+    return this->context.tstates;
+}
+
+void z80proc::reset()
+{
+    Z80RESET(&this->context);
 }

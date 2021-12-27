@@ -47,6 +47,7 @@ void sms::run()
 {
     if(this->stopped)
     {
+        current_proc->reset();
         this->stopped = false;
         std::thread new_emu_thread(emulation_loop, this);
         emulation_thread = std::move(new_emu_thread);
@@ -112,5 +113,13 @@ void sms::emulation_loop(sms *instance)
 
 void sms::update()
 {
+    uint ticks = 0;
 
+    while(ticks < TICKS_PER_FRAME)
+    {
+        uint core_cycles = current_proc->exec_instr();
+        uint new_ticks = core_cycles * CORE_DIV;
+        // TODO: add VDP and sound updates
+        ticks += new_ticks;
+    }
 }

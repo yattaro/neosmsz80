@@ -7,6 +7,8 @@ HEADERS += sms_rom.h\
     z80mem.h\
     z80proc.h
 
+LIBS += -lz80
+
 SOURCES += sms_rom.cpp\
     sms.cpp\
     z80mem.cpp\

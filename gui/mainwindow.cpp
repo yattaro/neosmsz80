@@ -24,9 +24,9 @@ void MainWindow::setRegisterVals()
     ui->z80RegView->setPlainText(QString(regValBuff));
 }
 
-void MainWindow::setMemView(const char *memStrings)
+void MainWindow::setMemView()
 {
-    ui->z80MemView->setPlainText(QString(memStrings));
+    ui->z80MemView->setPlainText(QString::fromStdString(current_memory->strmem()));
 }
 
 void MainWindow::on_actionOpen_ROM_triggered()
@@ -38,6 +38,7 @@ void MainWindow::on_actionOpen_ROM_triggered()
         current_memory = current_emu->get_mem();
         current_proc = current_emu->get_proc();
         setRegisterVals();
+        setMemView();
         ui->actionRun->setEnabled(true);
         ui->actionPause->setEnabled(false);
         ui->actionStop->setEnabled(false);
@@ -60,6 +61,7 @@ void MainWindow::on_actionPause_triggered()
     current_emu->pause();
     ui->actionRun->setEnabled(true);
     setRegisterVals();
+    setMemView();
 }
 
 
@@ -68,6 +70,8 @@ void MainWindow::on_actionStop_triggered()
     ui->actionStop->setEnabled(false);
     ui->actionPause->setEnabled(false);
     current_emu->stop();
+    setRegisterVals();
+    setMemView();
     ui->actionRun->setEnabled(true);
 }
 
