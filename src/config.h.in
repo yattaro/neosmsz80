@@ -1,6 +1,0 @@
-#ifndef smsz80_config
-#define smsz80_config
-
-#cmakedefine BIG_ENDIAN
-
-#endif

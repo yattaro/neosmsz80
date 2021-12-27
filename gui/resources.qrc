@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/images">
+        <file>sms_cart.png</file>
+        <file>sms.png</file>
+    </qresource>
+</RCC>

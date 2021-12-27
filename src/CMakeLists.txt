@@ -1,7 +1,0 @@
-add_executable(smsz80 mem.c sms_runner.c instruction.c z80.c smsz80.c)
-set_target_properties(smsz80 PROPERTIES LINKER_LANGUAGE C) 
-IF(CMAKE_C_BYTE_ORDER EQUAL BIG_ENDIAN)
-    set(BIG_ENDIAN 1)
-endif()
-configure_file(config.h.in config.h)
-add_compile_options(-Wall -Wextra -pedantic)
