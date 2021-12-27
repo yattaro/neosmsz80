@@ -6,6 +6,7 @@ Currently non-functional WIP loosely following the guide at [codeslinger.co.uk](
 ---
 ## Requirements
 - [libz80 library](https://github.com/ggambetta/libz80)
+- C++11 or above
 - Qt 5 or above development environment
 - qmake for building
   - (I use Qt Creator in my development environment; help converting this to something more common like CMake so it plays nicely with other IDEs would be greatly appreciated)

@@ -75,7 +75,6 @@ void sms::stop()
 
 void sms::emulation_loop(sms *instance)
 {
-    using namespace std::chrono; // to preserve my sanity
     //target framerate in frames per millisecond
    const double frame_rate = 1000 / (MAIN_CLK/TICKS_PER_FRAME);
    double last_frame_time = 0;
@@ -84,7 +83,7 @@ void sms::emulation_loop(sms *instance)
     {
         if(!instance->isPaused())
         {
-            current_time = time_point_cast<milliseconds>(steady_clock::now()).time_since_epoch().count();
+            current_time = std::chrono::time_point_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now()).time_since_epoch().count();
             if((last_frame_time + frame_rate) <= current_time)
             {
                 last_frame_time = current_time;
