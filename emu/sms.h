@@ -1,5 +1,7 @@
 #ifndef SMS_H
 #define SMS_H
+#include <condition_variable>
+#include <mutex>
 #include <string>
 #include <thread>
 #include "z80mem.h"
@@ -40,6 +42,8 @@ private:
     bool external_proc = false;
     bool paused = true;
     bool stopped = true;
+    std::condition_variable pause_cv;
+    std::mutex pause_lock;
     std::thread emulation_thread;
 };
 

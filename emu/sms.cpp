@@ -1,5 +1,6 @@
 #include "sms.h"
 #include <chrono>
+#include <iostream>
 #include <thread>
 
 sms::sms(z80mem *mem, z80proc *proc)
@@ -50,9 +51,11 @@ void sms::run()
         std::thread new_emu_thread(emulation_loop, this);
         emulation_thread = std::move(new_emu_thread);
     }
-    else
+    if(this->paused)
     {
-        if(this->paused) this->paused = false;
+        this->paused = false;
+        std::lock_guard<std::mutex> lk(this->pause_lock);
+        this->pause_cv.notify_all();
     }
 }
 
@@ -69,6 +72,12 @@ void sms::stop()
     if(!this->stopped)
     {
         this->stopped = true;
+        if(this->paused)
+        {
+            this->paused = false;
+            std::lock_guard<std::mutex> lk(this->pause_lock);
+            this->pause_cv.notify_all();
+        }
         emulation_thread.join();
     }
 }
@@ -90,7 +99,15 @@ void sms::emulation_loop(sms *instance)
                 instance->update();
             }
         }
+        else
+        {
+            std::unique_lock<std::mutex> lk(instance->pause_lock);
+            std::cout << "Emulation paused." << std::endl;
+            instance->pause_cv.wait(lk);
+            std::cout << "Emulation resumed." << std::endl;
+        }
     }
+    std::cout << "Emulation stopped." << std::endl;
 }
 
 void sms::update()

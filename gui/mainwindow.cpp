@@ -47,7 +47,27 @@ void MainWindow::on_actionOpen_ROM_triggered()
 
 void MainWindow::on_actionRun_triggered()
 {
+    ui->actionRun->setEnabled(false);
+    current_emu->run();
     ui->actionPause->setEnabled(true);
     ui->actionStop->setEnabled(true);
+}
+
+
+void MainWindow::on_actionPause_triggered()
+{
+    ui->actionPause->setEnabled(false);
+    current_emu->pause();
+    ui->actionRun->setEnabled(true);
+    setRegisterVals();
+}
+
+
+void MainWindow::on_actionStop_triggered()
+{
+    ui->actionStop->setEnabled(false);
+    ui->actionPause->setEnabled(false);
+    current_emu->stop();
+    ui->actionRun->setEnabled(true);
 }
 
