@@ -37,7 +37,7 @@ uint sms_rom::getSize()
  * Returns a pointer to the ROM data at the given offset.
  * Throws an exception if the offset is out of range.
  */
-byte *sms_rom::pointerAt(const uint addr)
+BYTE *sms_rom::pointerAt(const uint addr)
 {
     if(addr >= size)
     {
@@ -53,7 +53,7 @@ byte *sms_rom::pointerAt(const uint addr)
  * Returns byte stored at address in ROM.
  * Throws an exception if the offset is out of range.
  */
-byte sms_rom::read(const uint addr)
+BYTE sms_rom::read(const uint addr)
 {
     if(addr >= size)
     {
@@ -89,7 +89,7 @@ void sms_rom::read_file(std::string filename)
             // Extra padding for Sega Card games
             // Avoids excess computation for mapping them to memory
             if(size < 0x20000) size = 0x20000;
-            data = new byte[size];
+            data = new BYTE[size];
             file.read((char *)data, filesize);
             file.close();
         }
@@ -125,10 +125,10 @@ void sms_rom::read_file(std::string filename)
  */
 void sms_rom::check_codemasters()
 {
-    ushort checksum = ((data[0x7fe7] << 8) | data[0x7fe6]);
+    WORD checksum = ((data[0x7fe7] << 8) | data[0x7fe6]);
     if(checksum != 0)
     {
-        ushort checksum_opposite = ((data[0x7fe9] << 8) | data[0x7fe8]);
+        WORD checksum_opposite = ((data[0x7fe9] << 8) | data[0x7fe8]);
         codemasters = ((0x10000 - checksum) == checksum_opposite);
     }
 }

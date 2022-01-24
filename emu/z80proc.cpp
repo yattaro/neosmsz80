@@ -1,22 +1,23 @@
 #include "z80proc.h"
 #include "sms.h"
+#include "sms_types.h"
 
 
 // Wrapper functions for non-static members of z80mem to be called by libz80
 z80mem *current_mem;
-void write_mem_wrapper(size_t param, const ushort addr, const byte data)
+void write_mem_wrapper(size_t param, const WORD addr, const BYTE data)
 {
     current_mem->write_mem(param, addr, data);
 }
-byte read_mem_wrapper(size_t param, const ushort addr)
+BYTE read_mem_wrapper(size_t param, const WORD addr)
 {
     return current_mem->read_mem(param, addr);
 }
-void io_write_wrapper(size_t param, const ushort addr, const byte data)
+void io_write_wrapper(size_t param, const WORD addr, const BYTE data)
 {
     current_mem->io_write(param, addr, data);
 }
-byte io_read_wrapper(size_t param, const ushort addr)
+BYTE io_read_wrapper(size_t param, const WORD addr)
 {
     return current_mem->io_read(param, addr);
 }

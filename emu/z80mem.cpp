@@ -20,9 +20,9 @@ void z80mem::init(sms_rom *rom, const bool rom_external)
     this->slot_0 = this->rom->pointerAt(0*ROM_PAGE_SIZE);
     this->slot_1 = this->rom->pointerAt(1*ROM_PAGE_SIZE);
     this->slot_2 = this->rom->pointerAt(2*ROM_PAGE_SIZE);
-    this->main_mem = new byte[MEM_SIZE];
-    this->bank_0 = new byte[ROM_PAGE_SIZE];
-    this->bank_1 = new byte[ROM_PAGE_SIZE];
+    this->main_mem = new BYTE[MEM_SIZE];
+    this->bank_0 = new BYTE[ROM_PAGE_SIZE];
+    this->bank_1 = new BYTE[ROM_PAGE_SIZE];
 }
 
 z80mem::~z80mem()
@@ -44,7 +44,7 @@ std::string z80mem::strmem()
     return memss.str();
 }
 
-void z80mem::slotstr(std::stringstream *memss, byte *slot, int slot_size, int start_offset)
+void z80mem::slotstr(std::stringstream *memss, BYTE *slot, int slot_size, int start_offset)
 {
     for(auto i = start_offset; i < slot_size; i += 0x10)
     {
@@ -62,7 +62,7 @@ void z80mem::slotstr(std::stringstream *memss, byte *slot, int slot_size, int st
  * value of data if it is, and simply returns if not (given this should be
  * undefined behavior on the actual hardware)
  */
-void z80mem::write_mem(size_t param, const ushort addr, const byte data)
+void z80mem::write_mem(size_t param, const WORD addr, const BYTE data)
 {
     (void)param;
     if(rom->isCodemasters() && (addr == 0x0 || addr == 0x4000 || addr == 0x8000))
@@ -99,7 +99,7 @@ void z80mem::write_mem(size_t param, const ushort addr, const byte data)
 /*
  * Returns value of memory stored at given address
  */
-byte z80mem::read_mem(size_t param, const ushort addr)
+BYTE z80mem::read_mem(size_t param, const WORD addr)
 {
     (void)param;
     // Avoid reading the control registers by using the non-mirrored addresses
@@ -124,7 +124,7 @@ byte z80mem::read_mem(size_t param, const ushort addr)
 
 //#define Z80_IO_OUTPUT
 
-void z80mem::io_write(size_t param, const ushort addr, const byte data)
+void z80mem::io_write(size_t param, const WORD addr, const BYTE data)
 {
     (void)param;
     #ifdef Z80_IO_OUTPUT
@@ -135,10 +135,10 @@ void z80mem::io_write(size_t param, const ushort addr, const byte data)
     #endif
 }
 
-byte z80mem::io_read(size_t param, const ushort addr)
+BYTE z80mem::io_read(size_t param, const WORD addr)
 {
     (void)param;
-    byte data = addr >> 8;
+    BYTE data = addr >> 8;
     #ifdef Z80_IO_OUTPUT
     printf("PR %04x %02x\n", addr, data);
     #endif
@@ -148,10 +148,10 @@ byte z80mem::io_read(size_t param, const ushort addr)
 /*
  * Handles standard memory paging
  */
-void z80mem::mem_page(const ushort addr, const byte data)
+void z80mem::mem_page(const WORD addr, const BYTE data)
 {
     // Mask to first six bits if cartridge has 1MB ROM, first five if not
-    byte page = rom->isOneMeg() ? data & 0x3F : data & 0x1F;
+    BYTE page = rom->isOneMeg() ? data & 0x3F : data & 0x1F;
 
     switch (addr)
     {
@@ -195,10 +195,10 @@ void z80mem::mem_page(const ushort addr, const byte data)
 /*
  * Handles memory paging for CodeMasters cartridges
  */
-void z80mem::mem_page_codemasters(const ushort addr, const byte data)
+void z80mem::mem_page_codemasters(const WORD addr, const BYTE data)
 {
     // Mask to first six bits if cartridge has 1MB ROM, first five if not
-    byte page = rom->isOneMeg() ? data & 0x3F : data & 0x1F;
+    BYTE page = rom->isOneMeg() ? data & 0x3F : data & 0x1F;
     switch (addr)
     {
         case 0x0:

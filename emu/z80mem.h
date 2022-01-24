@@ -1,7 +1,7 @@
 #ifndef Z80MEM_H
 #define Z80MEM_H
-#include <z80.h>
 #include <string>
+#include "sms_types.h"
 #include "sms_rom.h"
 
 #define ROM_PAGE_SIZE 0x4000
@@ -20,21 +20,21 @@ public:
     z80mem(sms_rom *rom);
     ~z80mem();
     std::string strmem();
-    void write_mem(size_t param, const ushort addr, const byte data);
-    byte read_mem(size_t param, const ushort addr);
-    void io_write(size_t param, const ushort addr, const byte data);
-    byte io_read(size_t param, const ushort addr);
+    void write_mem(size_t param, const WORD addr, const BYTE data);
+    BYTE read_mem(size_t param, const WORD addr);
+    void io_write(size_t param, const WORD addr, const BYTE data);
+    BYTE io_read(size_t param, const WORD addr);
 private:
-    void slotstr(std::stringstream *memss, byte *slot, int slot_size, int start_offset);
+    void slotstr(std::stringstream *memss, BYTE *slot, int slot_size, int start_offset);
     void init(sms_rom *rom, const bool rom_external);
-    void mem_page(const ushort addr, const byte data);
-    void mem_page_codemasters(const ushort addr, const byte data);
-    byte *slot_0;
-    byte *slot_1;
-    byte *slot_2;
-    byte *main_mem;
-    byte *bank_0;
-    byte *bank_1;
+    void mem_page(const WORD addr, const BYTE data);
+    void mem_page_codemasters(const WORD addr, const BYTE data);
+    BYTE *slot_0;
+    BYTE *slot_1;
+    BYTE *slot_2;
+    BYTE *main_mem;
+    BYTE *bank_0;
+    BYTE *bank_1;
     sms_rom *rom;
     bool rom_external;
 };
