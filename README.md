@@ -4,6 +4,13 @@ An attempt at a Sega Master System emulator in C++ with a Qt frontend.
 Currently non-functional WIP loosely following the guide at [codeslinger.co.uk](http://www.codeslinger.co.uk/pages/projects/mastersystem.html)
 
 ---
+## TODO
+- [ ] VDP
+- [ ] Interrupts
+- [ ] Controls
+- [ ] Sound
+- [ ] Ports to other platforms?
+---
 ## Requirements
 - [libz80 library](https://github.com/ggambetta/libz80)
 - C++11 or above
