@@ -127,22 +127,40 @@ BYTE z80mem::read_mem(size_t param, const WORD addr)
 void z80mem::io_write(size_t param, const WORD addr, const BYTE data)
 {
     (void)param;
-    #ifdef Z80_IO_OUTPUT
-    printf("PW %04x %02x\n", addr, data);
-    #else
-    (void)addr;
     (void)data;
-    #endif
+    switch(addr)
+    {
+        case 0x7E:
+        // Write to VDP sound chip
+        case 0x7F:
+        // Write to VDP sound chip
+        case 0xBE:
+        // Write to VDP data port
+        case 0xBF:
+        // Write to VDP control port
+        default:
+        break;
+    }
 }
 
 BYTE z80mem::io_read(size_t param, const WORD addr)
 {
     (void)param;
-    BYTE data = addr >> 8;
-    #ifdef Z80_IO_OUTPUT
-    printf("PR %04x %02x\n", addr, data);
-    #endif
-    return data;
+    switch(addr)
+    {
+        case 0x7E:
+        // Write to VDP vcounter
+        case 0x7F:
+        // Write to VDP hcounter
+        case 0xBE:
+        // Read from VDP data port
+        case 0xBF:
+        // Read from VDP control port
+        default:
+        break;
+    }
+
+    return 0; // placeholder value, we wouldn't normally be here
 }
 
 /*

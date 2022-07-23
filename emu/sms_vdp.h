@@ -1,6 +1,6 @@
 #ifndef SMS_VDP_H
 #define SMS_VDP_H
-#include <z80.h>
+#include "sms_types.h"
 
 
 class sms_vdp
@@ -9,8 +9,12 @@ public:
     sms_vdp();
 
 private:
-    byte vram[0x4000];
-    byte cram[0x20];
+    BYTE vram[0x4000];
+    BYTE cram[0x20];
+    BYTE vdp_regs[0xB];
+    BYTE vcounter;
+    WORD control_word;
+    bool is_second_control_write;
 };
 
 #endif // SMS_VDP_H
