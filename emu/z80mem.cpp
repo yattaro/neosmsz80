@@ -3,20 +3,21 @@
 #include <stdlib.h>
 #include <sstream>
 
-z80mem::z80mem(std::string rom_file)
+z80mem::z80mem(std::string rom_file, sms_vdp *vdp)
 {
-    init(new sms_rom(rom_file), false);
+    init(new sms_rom(rom_file), false, vdp);
 }
 
-z80mem::z80mem(sms_rom *rom)
+z80mem::z80mem(sms_rom *rom, sms_vdp *vdp)
 {
-    init(rom, true);
+    init(rom, true, vdp);
 }
 
-void z80mem::init(sms_rom *rom, const bool rom_external)
+void z80mem::init(sms_rom *rom, const bool rom_external, sms_vdp *vdp)
 {
     this->rom = rom;
     this->rom_external = rom_external;
+    this->vdp = vdp;
     this->slot_0 = this->rom->pointerAt(0*ROM_PAGE_SIZE);
     this->slot_1 = this->rom->pointerAt(1*ROM_PAGE_SIZE);
     this->slot_2 = this->rom->pointerAt(2*ROM_PAGE_SIZE);
@@ -122,8 +123,9 @@ BYTE z80mem::read_mem(size_t param, const WORD addr)
     return main_mem[addr];
 }
 
-//#define Z80_IO_OUTPUT
-
+/*
+ * Handles writes to I/O ports (for OUT instruction)
+ */
 void z80mem::io_write(size_t param, const WORD addr, const BYTE data)
 {
     (void)param;
@@ -143,15 +145,18 @@ void z80mem::io_write(size_t param, const WORD addr, const BYTE data)
     }
 }
 
+/*
+ * Handles reads to I/O ports (for IN instruction)
+ */
 BYTE z80mem::io_read(size_t param, const WORD addr)
 {
     (void)param;
     switch(addr)
     {
         case 0x7E:
-        // Write to VDP vcounter
+        return vdp->read_vcounter();
         case 0x7F:
-        // Write to VDP hcounter
+        return vdp->read_hcounter();
         case 0xBE:
         // Read from VDP data port
         case 0xBF:

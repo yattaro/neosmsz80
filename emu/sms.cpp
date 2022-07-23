@@ -3,24 +3,28 @@
 #include <iostream>
 #include <thread>
 
-sms::sms(z80mem *mem, z80proc *proc)
+sms::sms(z80mem *mem, z80proc *proc, sms_vdp *vdp)
 {
     this->current_mem = mem;
     this->current_proc = proc;
+    this->current_vdp = vdp;
     this->external_mem = true;
     this->external_proc = true;
+    this->external_vdp = true;
 }
 
 sms::sms(std::string rom_file)
 {
     this->current_mem = new z80mem(rom_file);
     this->current_proc = new z80proc(this->current_mem);
+    this->current_vdp = new sms_vdp();
 }
 
 sms::~sms()
 {
     if(!external_mem) delete current_mem;
     if(!external_proc) delete current_proc;
+    if(!external_vdp) delete current_vdp;
 }
 
 z80mem *sms::get_mem()

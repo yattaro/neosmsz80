@@ -1,6 +1,7 @@
 #ifndef Z80MEM_H
 #define Z80MEM_H
 #include <string>
+#include "sms_vdp.h"
 #include "sms_types.h"
 #include "sms_rom.h"
 
@@ -16,8 +17,8 @@
 class z80mem
 {
 public:
-    z80mem(std::string rom_file);
-    z80mem(sms_rom *rom);
+    z80mem(std::string rom_file, sms_vdp *vdp);
+    z80mem(sms_rom *rom, sms_vdp *vdp);
     ~z80mem();
     std::string strmem();
     void write_mem(size_t param, const WORD addr, const BYTE data);
@@ -26,7 +27,7 @@ public:
     BYTE io_read(size_t param, const WORD addr);
 private:
     void slotstr(std::stringstream *memss, BYTE *slot, int slot_size, int start_offset);
-    void init(sms_rom *rom, const bool rom_external);
+    void init(sms_rom *rom, const bool rom_external, sms_vdp *vdp);
     void mem_page(const WORD addr, const BYTE data);
     void mem_page_codemasters(const WORD addr, const BYTE data);
     BYTE *slot_0;
@@ -37,6 +38,7 @@ private:
     BYTE *bank_1;
     sms_rom *rom;
     bool rom_external;
+    sms_vdp *vdp;
 };
 
 #endif // Z80MEM_H

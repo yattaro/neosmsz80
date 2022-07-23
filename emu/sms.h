@@ -4,6 +4,7 @@
 #include <mutex>
 #include <string>
 #include <thread>
+#include "sms_vdp.h"
 #include "z80mem.h"
 #include "z80proc.h"
 
@@ -23,7 +24,7 @@
 class sms
 {
 public:
-    sms(z80mem *mem, z80proc *proc);
+    sms(z80mem *mem, z80proc *proc, sms_vdp *vdp);
     sms(std::string rom_file);
     ~sms();
     z80mem *get_mem();
@@ -38,8 +39,10 @@ public:
 private:
     z80mem *current_mem;
     z80proc *current_proc;
+    sms_vdp *current_vdp;
     bool external_mem = false;
     bool external_proc = false;
+    bool external_vdp = false;
     bool paused = true;
     bool stopped = true;
     std::condition_variable pause_cv;
