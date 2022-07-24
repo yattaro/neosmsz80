@@ -15,9 +15,9 @@ sms::sms(z80mem *mem, z80proc *proc, sms_vdp *vdp)
 
 sms::sms(std::string rom_file)
 {
-    this->current_mem = new z80mem(rom_file);
-    this->current_proc = new z80proc(this->current_mem);
     this->current_vdp = new sms_vdp();
+    this->current_mem = new z80mem(rom_file, this->current_vdp);
+    this->current_proc = new z80proc(this->current_mem);
 }
 
 sms::~sms()

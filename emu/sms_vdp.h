@@ -9,6 +9,7 @@ public:
     sms_vdp();
     BYTE read_vcounter();
     BYTE read_hcounter();
+    void write_control_word(BYTE data);
 
 private:
     BYTE vram[0x4000];

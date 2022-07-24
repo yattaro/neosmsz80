@@ -139,7 +139,7 @@ void z80mem::io_write(size_t param, const WORD addr, const BYTE data)
         case 0xBE:
         // Write to VDP data port
         case 0xBF:
-        // Write to VDP control port
+        vdp->write_control_word(data);
         default:
         break;
     }

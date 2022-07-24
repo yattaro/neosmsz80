@@ -22,3 +22,8 @@ BYTE sms_vdp::read_hcounter()
 {
     return hcounter;
 }
+
+void sms_vdp::write_control_word(BYTE data)
+{
+    (void)data;
+}
