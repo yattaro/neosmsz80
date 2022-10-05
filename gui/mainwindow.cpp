@@ -16,7 +16,7 @@ MainWindow::MainWindow(QWidget *parent)
 MainWindow::~MainWindow()
 {
     delete ui;
-    delete current_emu;
+    if(current_emu_initialized) delete current_emu;
 }
 void MainWindow::setRegisterVals()
 {
@@ -35,6 +35,7 @@ void MainWindow::on_actionOpen_ROM_triggered()
     if(!filename.isNull())
     {
         current_emu = new sms(filename.toStdString());
+        current_emu_initialized = true;
         current_memory = current_emu->get_mem();
         current_proc = current_emu->get_proc();
         setRegisterVals();

@@ -30,6 +30,7 @@ private:
     Ui::MainWindow *ui;
     void openFile();
     sms *current_emu;
+    bool current_emu_initialized = false;
     z80mem *current_memory;
     z80proc *current_proc;
     char regValBuff[198];
